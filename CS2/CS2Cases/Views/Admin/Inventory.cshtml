@@ -1,0 +1,69 @@
+@model List<CS2Cases.Models.UserInventory>
+@{
+    ViewData["Title"] = "Инвентарь пользователей";
+    ViewData["ActivePage"] = "Inventory";
+    ViewData["Breadcrumb"] = "Инвентарь";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div style="color:#9ca3af; font-size:0.9rem;">Всего записей: @Model.Count</div>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Скин</th>
+                    <th>Состояние</th>
+                    <th>Пользователь (Session)</th>
+                    <th>Дата</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="color:#6b7280">#@item.Id</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <img src="@item.Skin?.ImageUrl" width="40" height="30"
+                                     style="object-fit:contain; background:#0d1117; border-radius:4px; padding:3px;"
+                                     onerror="this.src='/images/skins/default.png'" />
+                                <span style="font-weight:600">@item.Skin?.Name</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="background:rgba(255,255,255,0.06); padding:3px 10px; border-radius:6px; font-size:0.8rem; font-weight:600;">
+                                @item.Condition
+                            </span>
+                        </td>
+                        <td style="color:#6b7280; font-size:0.78rem; font-family:monospace; max-width:160px; overflow:hidden; text-overflow:ellipsis;">
+                            @item.UserId.Substring(0, Math.Min(16, item.UserId.Length))…
+                        </td>
+                        <td style="color:#9ca3af; font-size:0.85rem;">
+                            @item.ObtainedAt.ToString("dd.MM.yyyy HH:mm")
+                        </td>
+                        <td>
+                            <form method="post" action="/Admin/DeleteInventory/@item.Id"
+                                  onsubmit="return confirm('Удалить запись #@item.Id?')">
+                                <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:#4b5563; padding:32px;">
+                            Инвентарь пуст — пока никто не открывал кейсы
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

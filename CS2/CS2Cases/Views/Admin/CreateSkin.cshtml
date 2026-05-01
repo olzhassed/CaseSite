@@ -1,0 +1,67 @@
+@model CS2Cases.Models.Skin
+@{
+    ViewData["Title"] = "Добавить скин";
+    ViewData["ActivePage"] = "Skins";
+    ViewData["Breadcrumb"] = "Контент / Скины / Добавить";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<div style="max-width:640px;">
+    <div class="card">
+        <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            Новый скин
+        </div>
+
+        <form method="post">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label class="form-label">Название скина *</label>
+                    <input type="text" name="Name" value="@Model?.Name" placeholder="AK-47 | Asiimov" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Тип оружия *</label>
+                    <select name="WeaponType" required>
+                        <option value="">— выбрать —</option>
+                        @foreach (var t in new[]{"Rifle","Pistol","Sniper","SMG","Shotgun","Knife","Gloves","Machinegun"})
+                        {
+                            <option value="@t" selected="@(Model?.WeaponType == t ? "selected" : null)">@t</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Редкость *</label>
+                    <select name="Rarity" required>
+                        @foreach (var r in new[]{"MilSpec","Restricted","Classified","Covert","Gold"})
+                        {
+                            <option value="@r" selected="@(Model?.Rarity == r ? "selected" : null)">@r</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Шанс выпадения (%) *</label>
+                    <input type="number" name="DropChance" value="@Model?.DropChance" step="0.01" min="0" max="100" placeholder="3.2" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Кейс *</label>
+                    <select name="CaseId" required>
+                        <option value="">— выбрать кейс —</option>
+                        @foreach (var c in (List<CS2Cases.Models.Case>)ViewBag.Cases)
+                        {
+                            <option value="@c.Id" selected="@(Model?.CaseId == c.Id ? "selected" : null)">@c.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label class="form-label">URL изображения</label>
+                    <input type="text" name="ImageUrl" value="@Model?.ImageUrl" placeholder="/images/skins/ak47_asiimov.png" />
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:8px;">
+                <button type="submit" class="btn btn-primary">Создать скин</button>
+                <a href="/Admin/Skins" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>

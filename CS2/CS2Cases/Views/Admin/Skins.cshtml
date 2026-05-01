@@ -1,0 +1,68 @@
+@model List<CS2Cases.Models.Skin>
+@{
+    ViewData["Title"] = "Скины";
+    ViewData["ActivePage"] = "Skins";
+    ViewData["Breadcrumb"] = "Контент / Скины";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div style="color:#9ca3af; font-size:0.9rem;">Всего: @Model.Count</div>
+    <a href="/Admin/CreateSkin" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        Добавить скин
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Изображение</th>
+                    <th>Название</th>
+                    <th>Тип</th>
+                    <th>Редкость</th>
+                    <th>Шанс %</th>
+                    <th>Кейс</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model)
+                {
+                    var rarityClass = s.Rarity switch {
+                        "Gold" => "badge-gold",
+                        "Covert" => "badge-covert",
+                        "Classified" => "badge-classified",
+                        "Restricted" => "badge-restricted",
+                        _ => "badge-milspec"
+                    };
+                    <tr>
+                        <td style="color:#6b7280">#@s.Id</td>
+                        <td>
+                            <img src="@s.ImageUrl" alt="@s.Name" width="48" height="36"
+                                 style="object-fit:contain; border-radius:6px; background:#0d1117; padding:4px;"
+                                 onerror="this.src='/images/skins/default.png'" />
+                        </td>
+                        <td style="font-weight:600; max-width:180px;">@s.Name</td>
+                        <td style="color:#9ca3af">@s.WeaponType</td>
+                        <td><span class="badge @rarityClass">@s.Rarity</span></td>
+                        <td style="color:#ffaa00">@s.DropChance.ToString("F2")%</td>
+                        <td style="color:#9ca3af; font-size:0.85rem;">@s.Case?.Name</td>
+                        <td>
+                            <div style="display:flex; gap:8px;">
+                                <a href="/Admin/EditSkin/@s.Id" class="btn btn-secondary btn-sm">Изменить</a>
+                                <form method="post" action="/Admin/DeleteSkin/@s.Id"
+                                      onsubmit="return confirm('Удалить скин «@s.Name»?')">
+                                    <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

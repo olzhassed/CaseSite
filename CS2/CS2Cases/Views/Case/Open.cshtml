@@ -1,0 +1,178 @@
+@model CS2Cases.Models.Case
+@{
+    ViewData["Title"] = "Открыть " + Model.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="open-page">
+    <div class="container">
+        <div class="open-header">
+            <a href="/Case" class="back-link">← Назад к кейсам</a>
+            <h1 class="open-title">@Model.Name</h1>
+            <p class="open-desc">@Model.Description</p>
+        </div>
+
+        <div class="reel-section">
+            <div class="reel-arrow"></div>
+            <div class="reel-wrapper">
+                <div class="reel-track" id="reel">
+                </div>
+            </div>
+        </div>
+
+        <div class="open-controls">
+            <button class="btn btn-open" id="openBtn" onclick="openCase(@Model.Id)">
+                <span id="btnText"> Открыть кейс — $@Model.Price.ToString("F2")</span>
+            </button>
+        </div>
+
+        <div class="result-overlay" id="resultOverlay" style="display:none">
+            <div class="result-card" id="resultCard">
+                <div class="result-badge" id="resultRarity"></div>
+                <img id="resultImg" src="" alt="" />
+                <div class="result-name" id="resultName"></div>
+                <div class="result-condition" id="resultCondition"></div>
+                <div class="result-actions">
+                    <button class="btn btn-primary" onclick="openAgain(@Model.Id)">Открыть ещё</button>
+                    <a href="/Case/Inventory" class="btn btn-outline">В инвентарь</a>
+                    <button class="btn btn-ghost" onclick="closeResult()">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="case-contents">
+            <h2>Содержимое кейса</h2>
+            <div class="skins-grid">
+                @foreach (var skin in Model.Skins.OrderByDescending(s => s.DropChance == 0 ? float.MaxValue : 1f / s.DropChance))
+                {
+                    <div class="skin-preview rarity-@skin.Rarity.ToLower()">
+                        <img src="@skin.ImageUrl" alt="@skin.Name" onerror="this.src='/images/skins/default.png'" />
+                        <div class="skin-preview-info">
+                            <span class="skin-preview-name">@skin.Name</span>
+                            <span class="skin-preview-rarity">@skin.Rarity</span>
+                            <span class="skin-preview-chance">@skin.DropChance.ToString("F2")%</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+
+    const skins = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Skins.Select(s => new {
+        id = s.Id, name = s.Name, rarity = s.Rarity, imageUrl = s.ImageUrl
+    })));
+
+    const rarityColors = {
+        "Consumer":   "#aaaaaa",
+        "Industrial": "#6496e1",
+        "MilSpec":    "#4b69ff",
+        "Restricted": "#8847ff",
+        "Classified": "#d32ce6",
+        "Covert":     "#eb4b4b",
+        "Gold":       "#e4ae39"
+    };
+
+    function buildReel() {
+        const reel = document.getElementById('reel');
+        reel.innerHTML = '';
+
+        const shuffled = [];
+        for (let i = 0; i < 60; i++) {
+            shuffled.push(skins[Math.floor(Math.random() * skins.length)]);
+        }
+        shuffled.forEach(skin => {
+            const div = document.createElement('div');
+            div.className = 'reel-item';
+            div.style.borderColor = rarityColors[skin.rarity] || '#aaa';
+            div.innerHTML = `<img src="${skin.imageUrl}" onerror="this.src='/images/skins/default.png'" /><span>${skin.name}</span>`;
+            reel.appendChild(div);
+        });
+    }
+
+    buildReel();
+
+    async function openCase(caseId) {
+        const btn = document.getElementById('openBtn');
+        btn.disabled = true;
+        document.getElementById('btnText').textContent = 'Открываем...';
+
+        buildReel();
+
+        const reel = document.getElementById('reel');
+        const itemWidth = 180 + 12;
+        const totalItems = 60;
+        const targetIndex = totalItems - 8;
+
+
+        const response = await fetch('/Case/Roll', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': getToken() },
+            body: `caseId=${caseId}`
+        });
+        const data = await response.json();
+
+        if (!data.success) {
+            alert('Ошибка: ' + data.message);
+            btn.disabled = false;
+            document.getElementById('btnText').textContent = `Открыть кейс`;
+            return;
+        }
+
+
+        const winItem = reel.children[targetIndex];
+        if (winItem) {
+            winItem.style.borderColor = rarityColors[data.rarity] || '#aaa';
+            winItem.innerHTML = `<img src="${data.imageUrl}" onerror="this.src='/images/skins/default.png'" /><span>${data.skinName}</span>`;
+        }
+
+
+        const offset = targetIndex * itemWidth - (reel.parentElement.offsetWidth / 2) + itemWidth / 2;
+        reel.style.transition = 'transform 4s cubic-bezier(0.12, 0.8, 0.25, 1)';
+        reel.style.transform = `translateX(-${offset}px)`;
+
+
+        setTimeout(() => {
+            showResult(data);
+            btn.disabled = false;
+            document.getElementById('btnText').textContent = `Открыть кейс`;
+        }, 4200);
+    }
+
+    function showResult(data) {
+        document.getElementById('resultRarity').textContent = data.rarity;
+        document.getElementById('resultRarity').style.background = rarityColors[data.rarity] || '#aaa';
+        document.getElementById('resultImg').src = data.imageUrl;
+        document.getElementById('resultName').textContent = data.skinName;
+        document.getElementById('resultCondition').textContent = conditionName(data.condition);
+        document.getElementById('resultCard').className = 'result-card rarity-' + data.rarity.toLowerCase();
+        document.getElementById('resultOverlay').style.display = 'flex';
+    }
+
+    function conditionName(c) {
+        const map = { FN: 'Factory New', MW: 'Minimal Wear', FT: 'Field-Tested', WW: 'Well-Worn', BS: 'Battle-Scarred' };
+        return map[c] || c;
+    }
+
+    function closeResult() {
+        document.getElementById('resultOverlay').style.display = 'none';
+        const reel = document.getElementById('reel');
+        reel.style.transition = 'none';
+        reel.style.transform = 'translateX(0)';
+        buildReel();
+    }
+
+    function openAgain(caseId) {
+        closeResult();
+        setTimeout(() => openCase(caseId), 100);
+    }
+
+    function getToken() {
+        const el = document.querySelector('input[name="__RequestVerificationToken"]');
+        return el ? el.value : '';
+    }
+</script>
+}

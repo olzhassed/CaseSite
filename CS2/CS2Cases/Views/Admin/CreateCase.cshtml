@@ -1,0 +1,42 @@
+@model CS2Cases.Models.Case
+@{
+    ViewData["Title"] = "Добавить кейс";
+    ViewData["ActivePage"] = "Cases";
+    ViewData["Breadcrumb"] = "Контент / Кейсы / Добавить";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<div style="max-width:640px;">
+    <div class="card">
+        <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            Новый кейс
+        </div>
+
+        <form method="post">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label class="form-label">Название кейса *</label>
+                    <input type="text" name="Name" value="@Model?.Name" placeholder="Например: Recoil Case" required />
+                </div>
+                <div class="form-group full">
+                    <label class="form-label">Описание</label>
+                    <textarea name="Description" placeholder="Краткое описание кейса">@Model?.Description</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Цена ($) *</label>
+                    <input type="number" name="Price" value="@Model?.Price" step="0.01" min="0" placeholder="2.49" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">URL изображения</label>
+                    <input type="text" name="ImageUrl" value="@Model?.ImageUrl" placeholder="/images/cases/mycase.png" />
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:8px;">
+                <button type="submit" class="btn btn-primary">Создать кейс</button>
+                <a href="/Admin/Cases" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>

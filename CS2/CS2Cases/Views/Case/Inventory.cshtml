@@ -1,0 +1,42 @@
+@model List<CS2Cases.Models.UserInventory>
+@{
+    ViewData["Title"] = "Инвентарь";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1>Мой инвентарь</h1>
+        <p>Всего предметов: <strong>@Model.Count</strong></p>
+    </div>
+</div>
+
+<div class="container">
+    @if (!Model.Any())
+    {
+        <div class="empty-inventory">
+            <div class="empty-icon">🎁</div>
+            <h2>Инвентарь пуст</h2>
+            <p>Откройте кейс, чтобы получить первый скин!</p>
+            <a href="/Case" class="btn btn-primary">Открыть кейс</a>
+        </div>
+    }
+    else
+    {
+        <div class="inventory-grid">
+            @foreach (var item in Model)
+            {
+                <div class="inventory-item rarity-@item.Skin?.Rarity.ToLower()">
+                    <img src="@item.Skin?.ImageUrl" alt="@item.Skin?.Name"
+                         onerror="this.src='/images/skins/default.png'" />
+                    <div class="inv-info">
+                        <span class="inv-name">@item.Skin?.Name</span>
+                        <span class="inv-condition">@item.Condition</span>
+                        <span class="inv-rarity">@item.Skin?.Rarity</span>
+                    </div>
+                    <div class="inv-date">@item.ObtainedAt.ToString("dd.MM.yyyy HH:mm")</div>
+                </div>
+            }
+        </div>
+    }
+</div>

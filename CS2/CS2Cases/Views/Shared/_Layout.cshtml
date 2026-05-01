@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — CS2 Cases</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar">
+            <a href="/" class="logo">
+                <span class="logo-cs">CS2</span><span class="logo-cases">CASES</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/Case">Кейсы</a></li>
+                <li><a href="/Case/Inventory">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zm0 12H4V9h16v10zM6 5h12v2H6z"/></svg>
+                    Инвентарь
+                </a></li>
+                @if (Context.Session.GetInt32("AuthUserId") != null)
+                {
+                    <li><a href="/Profile">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                        @Context.Session.GetString("AuthUsername")
+                    </a></li>
+                    <li><a href="/Account/Logout">Выйти</a></li>
+                }
+                else
+                {
+                    <li><a href="/Account/Login">Войти</a></li>
+                }
+                <li><a href="/Admin" style="color:#7c5cfc;font-size:0.75rem;opacity:0.6;letter-spacing:1px;text-transform:uppercase;">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <p>CS2 Cases — учебный проект на ASP.NET Core MVC &nbsp;|&nbsp; Не является официальным продуктом Valve</p>
+    </footer>
+
+    <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

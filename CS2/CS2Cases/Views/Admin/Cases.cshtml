@@ -1,0 +1,63 @@
+@model List<CS2Cases.Models.Case>
+@{
+    ViewData["Title"] = "Кейсы";
+    ViewData["ActivePage"] = "Cases";
+    ViewData["Breadcrumb"] = "Контент / Кейсы";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div style="color:#9ca3af; font-size:0.9rem;">Всего: @Model.Count</div>
+    <a href="/Admin/CreateCase" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        Добавить кейс
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Изображение</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Цена</th>
+                    <th>Скинов</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td style="color:#6b7280">#@c.Id</td>
+                        <td>
+                            <img src="@c.ImageUrl" alt="@c.Name" width="48" height="48"
+                                 style="object-fit:contain; border-radius:6px; background:#0d1117; padding:4px;"
+                                 onerror="this.src='/images/cases/default.png'" />
+                        </td>
+                        <td style="font-weight:600">@c.Name</td>
+                        <td style="color:#9ca3af; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">@c.Description</td>
+                        <td style="color:#ffaa00; font-weight:600">$@c.Price.ToString("F2")</td>
+                        <td>
+                            <span style="background:rgba(255,170,0,0.1); color:#ffaa00; padding:3px 10px; border-radius:20px; font-size:0.8rem;">
+                                @c.Skins.Count
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:8px;">
+                                <a href="/Admin/EditCase/@c.Id" class="btn btn-secondary btn-sm">Изменить</a>
+                                <form method="post" action="/Admin/DeleteCase/@c.Id"
+                                      onsubmit="return confirm('Удалить кейс «@c.Name»? Все скины в нём тоже удалятся.')">
+                                    <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

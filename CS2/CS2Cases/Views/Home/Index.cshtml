@@ -1,0 +1,74 @@
+@model List<CS2Cases.Models.Case>
+@{
+    ViewData["Title"] = "Главная";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container" style="position:relative;z-index:1;width:100%;">
+        <div class="hero-content">
+            <div class="hero-badge">🔥 Ежедневные дропы активны</div>
+            <h1 class="hero-title">
+                Открой свой<br/>
+                <span class="accent">лучший скин</span>
+            </h1>
+            <p class="hero-sub">
+                Честные шансы. Реальные дропы. Каждый кейс — новый шанс на редкий скин.
+            </p>
+            <div class="hero-actions">
+                <a href="/Case" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.35C18 2.99 16.01 1 13.65 1c-1.3 0-2.48.56-3.33 1.44L9 3.77l-1.32-1.33C6.83 1.56 5.65 1 4.35 1 1.99 1 0 2.99 0 4.65c0 .47.11.91.18 1.35H0v14h20V6z"/></svg>
+                    Открыть кейс
+                </a>
+                <a href="/Account/Register" class="btn btn-outline">Создать аккаунт</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Кейсы -->
+    <section class="section-block">
+        <div class="section-head">
+            <div class="section-label">Популярные кейсы</div>
+            <a href="/Case" class="see-all">Все кейсы →</a>
+        </div>
+        <div class="cases-grid">
+            @foreach (var c in Model)
+            {
+                <div class="case-card" onclick="window.location='/Case/Open/@c.Id'">
+                    <div class="case-img-wrap">
+                        <img src="@c.ImageUrl" alt="@c.Name" class="case-img" onerror="this.src='/images/cases/default.png'" />
+                    </div>
+                    <div class="case-info">
+                        <h3 class="case-name">@c.Name</h3>
+                        <p class="case-desc">@c.Description</p>
+                        <div class="case-footer">
+                            <span class="case-price">$@c.Price.ToString("F2")</span>
+                            <span class="skin-count">@c.Skins.Count скинов</span>
+                        </div>
+                        <button class="case-open-btn" style="margin-top:12px;">Открыть кейс</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Редкость -->
+    <section class="section-block">
+        <div class="section-head">
+            <div class="section-label">Редкость предметов</div>
+        </div>
+        <div class="rarity-grid">
+            <div class="rarity-item consumer">Consumer Grade <span>~79.92%</span></div>
+            <div class="rarity-item industrial">Industrial Grade <span>~15.98%</span></div>
+            <div class="rarity-item milspec">Mil-Spec <span>~7.99%</span></div>
+            <div class="rarity-item restricted">Restricted <span>~3.99%</span></div>
+            <div class="rarity-item classified">Classified <span>~1.60%</span></div>
+            <div class="rarity-item covert">Covert <span>~0.64%</span></div>
+            <div class="rarity-item gold">★ Rare Special <span>~0.26%</span></div>
+        </div>
+    </section>
+</div>

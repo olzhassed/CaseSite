@@ -1,0 +1,34 @@
+@model List<CS2Cases.Models.Case>
+@{
+    ViewData["Title"] = "Кейсы";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1>Все кейсы</h1>
+        <p>Выберите кейс и испытайте удачу — честные шансы, реальные дропы</p>
+    </div>
+</div>
+
+<div class="container" style="padding-bottom:60px;">
+    <div class="cases-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));">
+        @foreach (var c in Model)
+        {
+            <div class="case-card" onclick="window.location='/Case/Open/@c.Id'">
+                <div class="case-img-wrap">
+                    <img src="@c.ImageUrl" alt="@c.Name" class="case-img" onerror="this.src='/images/cases/default.png'" />
+                </div>
+                <div class="case-info">
+                    <h3 class="case-name">@c.Name</h3>
+                    <p class="case-desc">@c.Description</p>
+                    <div class="case-footer">
+                        <span class="case-price">$@c.Price.ToString("F2")</span>
+                        <span class="skin-count">@c.Skins.Count скинов</span>
+                    </div>
+                    <button class="case-open-btn" style="margin-top:12px;">Открыть кейс</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>

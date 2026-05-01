@@ -1,0 +1,336 @@
+@model CS2Cases.Models.UserProfile
+@{
+    ViewData["Title"] = "Профиль";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var inventory = (List<CS2Cases.Models.UserInventory>)ViewBag.Inventory;
+
+    var rarityColors = new Dictionary<string, string> {
+        {"Gold", "#e4ae39"}, {"Covert", "#eb4b4b"}, {"Classified", "#d32ce6"},
+        {"Restricted", "#8847ff"}, {"MilSpec", "#4b69ff"}, {"Industrial", "#6496e1"}, {"Consumer", "#aaaaaa"}
+    };
+}
+
+@section Styles {
+<style>
+* { box-sizing: border-box; }
+
+.profile-page {
+    padding: 40px 0 80px;
+    min-height: calc(100vh - 120px);
+}
+
+.profile-hero {
+    position: relative;
+    background: linear-gradient(135deg, #0f1923 0%, #1a2535 50%, #0f1923 100%);
+    border: 1px solid #1e2a3a;
+    border-radius: 20px;
+    padding: 36px 40px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+.profile-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,170,0,0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+.profile-avatar {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: linear-gradient(135deg, #ffaa00, #ff6600);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; font-weight: 700; color: #000;
+    flex-shrink: 0; font-family: 'Rajdhani', sans-serif;
+    box-shadow: 0 0 0 4px rgba(255,170,0,0.15), 0 8px 32px rgba(255,100,0,0.2);
+}
+.profile-info { flex: 1; min-width: 0; }
+.profile-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2rem; font-weight: 700; color: #e5e7eb;
+    margin-bottom: 2px; line-height: 1;
+}
+.profile-since { color: #4b5563; font-size: 0.82rem; margin-bottom: 14px; }
+.profile-edit-form { display: flex; gap: 8px; align-items: center; }
+.profile-edit-form input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #2d3f55; border-radius: 8px;
+    padding: 8px 14px; color: #e5e7eb;
+    font-family: 'Exo 2', sans-serif; font-size: 0.88rem;
+    outline: none; width: 180px; transition: border-color .2s;
+}
+.profile-edit-form input:focus { border-color: #ffaa00; }
+.profile-edit-form button {
+    background: linear-gradient(135deg, #ffaa00, #ff6600);
+    border: none; border-radius: 8px; padding: 8px 16px; color: #000;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: opacity .15s; white-space: nowrap;
+}
+.profile-edit-form button:hover { opacity: .85; }
+.profile-balance { text-align: right; flex-shrink: 0; }
+.balance-label {
+    color: #4b5563; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;
+}
+.balance-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.6rem; font-weight: 700; color: #ffaa00;
+    text-shadow: 0 0 20px rgba(255,170,0,0.3); line-height: 1;
+}
+
+/* ── Stats ── */
+.stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 14px; margin-bottom: 32px;
+}
+.stat-box {
+    background: #111827; border: 1px solid #1e2a3a;
+    border-radius: 14px; padding: 22px 20px; text-align: center;
+    transition: border-color .2s; position: relative; overflow: hidden;
+}
+.stat-box::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #ffaa00, transparent);
+    opacity: 0; transition: opacity .2s;
+}
+.stat-box:hover { border-color: #2d3f55; }
+.stat-box:hover::after { opacity: 1; }
+.stat-box .sv {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.2rem; font-weight: 700; color: #ffaa00; line-height: 1;
+}
+.stat-box .sl {
+    color: #4b5563; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-top: 6px;
+}
+
+/* ── Section header ── */
+.section-header {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 18px;
+}
+.section-title {
+    font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; font-weight: 600;
+    color: #e5e7eb; display: flex; align-items: center; gap: 10px;
+}
+.section-title .count {
+    background: rgba(255,170,0,0.1); border: 1px solid rgba(255,170,0,0.2);
+    color: #ffaa00; font-size: 0.8rem; padding: 3px 10px; border-radius: 20px;
+    font-family: 'Exo 2', sans-serif; font-weight: 400;
+}
+.section-total { color: #6b7280; font-size: 0.85rem; }
+.section-total span { color: #ffaa00; font-weight: 600; }
+
+/* ── Inventory ── */
+.inv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 12px;
+}
+.inv-card {
+    background: #0d1520; border: 1px solid #1a2535;
+    border-radius: 12px; position: relative;
+    transition: all .2s; overflow: hidden;
+}
+.inv-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+}
+.inv-card-top { padding: 14px 14px 10px; position: relative; }
+.rarity-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.inv-card img {
+    width: 100%; height: 110px; object-fit: contain; display: block;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    transition: transform .2s;
+}
+.inv-card:hover img { transform: scale(1.06); }
+.inv-card-bottom {
+    padding: 10px 14px 12px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    background: rgba(0,0,0,0.2);
+}
+.ic-name {
+    font-size: 0.8rem; font-weight: 600; color: #e5e7eb;
+    line-height: 1.3; margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ic-meta {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 6px;
+}
+.ic-cond {
+    font-size: 0.7rem; color: #6b7280;
+    background: rgba(255,255,255,0.05);
+    padding: 2px 7px; border-radius: 4px;
+}
+.ic-rarity { font-size: 0.7rem; font-weight: 600; }
+.ic-price {
+    font-size: 0.95rem; color: #ffaa00; font-weight: 700;
+    font-family: 'Rajdhani', sans-serif; margin-bottom: 8px;
+}
+.sell-btn {
+    width: 100%; background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.25); border-radius: 7px;
+    color: #10b981; font-family: 'Exo 2', sans-serif;
+    font-size: 0.78rem; font-weight: 600; padding: 7px 10px;
+    cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.sell-btn:hover { background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.4); }
+.sell-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Empty ── */
+.empty-inv { text-align: center; padding: 64px 20px; }
+.empty-inv .empty-icon { font-size: 4rem; margin-bottom: 16px; opacity: .4; }
+.empty-inv h3 { font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; color: #4b5563; margin-bottom: 8px; }
+.empty-inv p { color: #374151; font-size: 0.9rem; margin-bottom: 20px; }
+.empty-inv a {
+    display: inline-block;
+    background: linear-gradient(135deg, #ffaa00, #ff6600);
+    color: #000; text-decoration: none;
+    padding: 11px 28px; border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700;
+    transition: opacity .15s;
+}
+.empty-inv a:hover { opacity: .85; }
+
+.alert-success {
+    background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 10px; color: #6ee7b7;
+    padding: 12px 16px; margin-bottom: 20px; font-size: 0.88rem;
+}
+</style>
+}
+
+<div class="container profile-page">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert-success">✓ @TempData["Success"]</div>
+    }
+
+    <div class="profile-hero">
+        <div class="profile-avatar">@Model.Username[0].ToString().ToUpper()</div>
+        <div class="profile-info">
+            <div class="profile-name">@Model.Username</div>
+            <div class="profile-since">На сайте с @Model.CreatedAt.ToString("dd.MM.yyyy")</div>
+            <form class="profile-edit-form" method="post" action="/Profile/UpdateUsername">
+                <input type="text" name="username" placeholder="Новое имя..." maxlength="30" />
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+        <div class="profile-balance">
+            <div class="balance-label">Баланс</div>
+            <div class="balance-value" id="profileBalance">$@Model.Balance.ToString("F2")</div>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="sv">@Model.CasesOpened</div>
+            <div class="sl">Кейсов открыто</div>
+        </div>
+        <div class="stat-box">
+            <div class="sv">@Model.SkinsSold</div>
+            <div class="sl">Скинов продано</div>
+        </div>
+        <div class="stat-box">
+            <div class="sv">$@Model.TotalEarned.ToString("F2")</div>
+            <div class="sl">Заработано всего</div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <div class="section-title">
+            Инвентарь
+            <span class="count" id="invCount">@inventory.Count</span>
+        </div>
+        @if (inventory.Any())
+        {
+            <div class="section-total">
+                Стоимость: <span>$@inventory.Sum(i => i.Skin?.SellPrice ?? 0).ToString("F2")</span>
+            </div>
+        }
+    </div>
+
+    @if (!inventory.Any())
+    {
+        <div class="empty-inv">
+            <div class="empty-icon"></div>
+            <h3>Инвентарь пуст</h3>
+            <p>Откройте кейс и получите первый скин!</p>
+            <a href="/Case">Открыть кейс</a>
+        </div>
+    }
+    else
+    {
+        <div class="inv-grid" id="invGrid">
+            @foreach (var item in inventory)
+            {
+                var rarity = item.Skin?.Rarity ?? "MilSpec";
+                var color = rarityColors.GetValueOrDefault(rarity, "#4b69ff");
+                var condFull = item.Condition switch {
+                    "FN" => "Factory New", "MW" => "Minimal Wear",
+                    "FT" => "Field-Tested", "WW" => "Well-Worn",
+                    "BS" => "Battle-Scarred", _ => item.Condition
+                };
+
+                <div class="inv-card" id="inv-@item.Id">
+                    <div class="inv-card-top">
+                        <div class="rarity-bar" style="background:@color;"></div>
+                        <img src="@item.Skin?.ImageUrl"
+                             onerror="this.src='/images/skins/default.png'"
+                             alt="@item.Skin?.Name" />
+                    </div>
+                    <div class="inv-card-bottom">
+                        <div class="ic-name" title="@item.Skin?.Name">@item.Skin?.Name</div>
+                        <div class="ic-meta">
+                            <span class="ic-cond" title="@condFull">@item.Condition</span>
+                            <span class="ic-rarity" style="color:@color;">@rarity</span>
+                        </div>
+                        <div class="ic-price">$@item.Skin?.SellPrice.ToString("F2")</div>
+                        <button class="sell-btn" onclick="sellSkin(@item.Id, this)">
+                            💰 Продать за $@item.Skin?.SellPrice.ToString("F2")
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+async function sellSkin(inventoryId, btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ Продаём...';
+
+    const res = await fetch('/Profile/SellSkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `inventoryId=${inventoryId}`
+    });
+    const data = await res.json();
+
+    if (data.success) {
+        document.getElementById('profileBalance').textContent = '$' + parseFloat(data.newBalance).toFixed(2);
+        const card = document.getElementById(`inv-${inventoryId}`);
+        card.style.transition = 'opacity .3s, transform .3s';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.85) translateY(-8px)';
+        setTimeout(() => {
+            card.remove();
+            const countEl = document.getElementById('invCount');
+            if (countEl) countEl.textContent = document.querySelectorAll('.inv-card').length;
+        }, 300);
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = '💰 Продать';
+        alert(data.message);
+    }
+}
+</script>
+}

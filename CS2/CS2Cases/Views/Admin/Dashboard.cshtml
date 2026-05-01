@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["ActivePage"] = "Dashboard";
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+}
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Кейсов</div>
+        <div class="stat-value">@ViewBag.CasesCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Скинов</div>
+        <div class="stat-value">@ViewBag.SkinsCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Записей инвентаря</div>
+        <div class="stat-value">@ViewBag.InventoryCount</div>
+    </div>
+</div>
+
+<div style="margin-bottom: 12px; color: #9ca3af; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Быстрые действия</div>
+<div class="quick-actions">
+    <a href="/Admin/CreateCase" class="quick-action-card">
+        <div class="icon"></div>
+        <div>
+            <div class="qa-title">Добавить кейс</div>
+            <div class="qa-sub">Новый кейс в магазин</div>
+        </div>
+    </a>
+    <a href="/Admin/CreateSkin" class="quick-action-card">
+        <div class="icon"></div>
+        <div>
+            <div class="qa-title">Добавить скин</div>
+            <div class="qa-sub">Новый скин в кейс</div>
+        </div>
+    </a>
+    <a href="/Admin/Cases" class="quick-action-card">
+        <div class="icon"></div>
+        <div>
+            <div class="qa-title">Управление кейсами</div>
+            <div class="qa-sub">Редактировать / удалить</div>
+        </div>
+    </a>
+    <a href="/Admin/Skins" class="quick-action-card">
+        <div class="icon"></div>
+        <div>
+            <div class="qa-title">Управление скинами</div>
+            <div class="qa-sub">Редактировать / удалить</div>
+        </div>
+    </a>
+    <a href="/Admin/Inventory" class="quick-action-card">
+        <div class="icon"></div>
+        <div>
+            <div class="qa-title">Инвентарь</div>
+            <div class="qa-sub">Просмотр всех записей</div>
+        </div>
+    </a>
+</div>
